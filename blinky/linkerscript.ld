@@ -1,0 +1,1 @@
+../shared/linkerscript.ld
