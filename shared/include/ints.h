@@ -1,17 +1,18 @@
+#pragma once
+
 #include <stdint.h>
 
-using u8 = uint8_t;
-using u16 = uint16_t;
-using u32 = uint32_t;
+#define DEFINE_INT(T, Base, Size)                                              \
+  using T = Base;                                                              \
+  constexpr T operator"" _##T(unsigned long long x) {                          \
+    return static_cast<T>(x);                                                  \
+  }                                                                            \
+  static_assert(sizeof(T) == Size);
 
-using i8 = int8_t;
-using i16 = int16_t;
-using i32 = int32_t;
+DEFINE_INT(u8, uint8_t, 1)
+DEFINE_INT(u16, uint16_t, 2)
+DEFINE_INT(u32, uint32_t, 4)
 
-static_assert(sizeof(u8) == 1);
-static_assert(sizeof(u16) == 2);
-static_assert(sizeof(u32) == 4);
-
-static_assert(sizeof(i8) == 1);
-static_assert(sizeof(i16) == 2);
-static_assert(sizeof(i32) == 4);
+DEFINE_INT(i8, int8_t, 1)
+DEFINE_INT(i16, int16_t, 2)
+DEFINE_INT(i32, int32_t, 4)
