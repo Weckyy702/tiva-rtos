@@ -48,9 +48,34 @@ void blocking_handler(void) {
 
 void null_handler(void) {}
 
+#define PIN1 0x02
+#define PIN2 0x04
+#define PIN3 0x08
+
+#define LED_PINS (PIN1 | PIN2 | PIN3)
+
+#define PORTF_GPIODEN *((volatile u32 *)0x4002'551C)
+#define PORTF_GPIODIR *((volatile u32 *)0x4002'5400)
+#define PORTF_GPIODATA *((volatile u32 *)(0x4002'5000 + LED_PINS))
+
 [[gnu::weak]] [[noreturn]] void reset_handler(void) {
-  for (;;)
-    ;
+  Register rcgc{0x400F'E608_u32};
+
+  u32 state = LED_PINS;
+
+  *rcgc |= 0x20;
+  PORTF_GPIODEN |= LED_PINS;
+  PORTF_GPIODIR |= LED_PINS;
+
+  for (;;) {
+    for (u32 i = 5'000'000; i != 0; --i) {
+    }
+
+    PORTF_GPIODATA &= ~LED_PINS;
+    PORTF_GPIODATA |= state;
+
+    state ^= LED_PINS;
+  }
 }
 }
 
