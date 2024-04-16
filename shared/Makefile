@@ -1,17 +1,32 @@
-CXX = arm-none-eabi-g++
+PREFIX = arm-none-eabi-
 
-CXXFLAGS += -std=c++20 -Og -nostdlib -nostdlib++ -ffreestanding -fno-exceptions -mcpu=cortex-m4 -Wall -Wextra -Werror -Iinclude -ffunction-sections
-LDFLAGS += -mthumb -Tlinkerscript.ld
+CXX = $(PREFIX)g++
+OBJCOPY = $(PREFIX)objcopy
+SIZE = $(PREFIX)size
+GDB = $(PREFIX)gdb
+
+STD ?= c++20
+OPTFLAGS ?= -Os
+DEBUGFLAGS ?= -ggdb
+WFLAGS ?= -Wall -Wextra -Werror
+CPUFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard
+STDLIB = -nostdlib -nostdlib++
+FFLAGS = -ffreestanding -fno-exceptions -ffunction-sections
+
+CXXFLAGS += -std=$(STD) $(OPTFLAGS) $(DEBUGFLAGS) $(STDLIB) $(FFLAGS) $(CPUFLAGS) $(WFLAGS) -Iinclude 
+LDFLAGS += $(CPUFLAGS) -Tlinkerscript.ld
 
 BUILDDIR = build
-BIN = kernel
+BIN = $(BUILDDIR)/kernel
+IMG = kernel.bin
 
 SRCS = $(shell find src -type f)
 OBJS = $(SRCS:%=$(BUILDDIR)/%.o)
 
-.PHONY: all clean
+.PHONY: clean img size upload openocd debug 
 
-all: $(BIN)
+img: $(BIN)
+	$(OBJCOPY) -Obinary $(BIN) $(IMG)
 
 $(BUILDDIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
@@ -20,5 +35,7 @@ $(BUILDDIR)/%.cpp.o: %.cpp
 $(BIN): $(OBJS)
 	$(CXX) -o $(BIN) $(CXXFLAGS) $(LDFLAGS) $(OBJS)
 
+
 clean:
-	rm -rf $(BUILDDIR)/* $(BIN)
+	rm -rf $(BUILDDIR)/* $(BIN) $(IMG)
+
