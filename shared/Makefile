@@ -48,5 +48,5 @@ debug: upload openocd
 	$(GDB) -ex "tar ext :3333" $(BIN)
 
 clean:
-	rm -rf $(BUILDDIR)/* $(BIN) $(IMG)
+	rm -rf $(BUILDDIR) $(BIN) $(IMG)
 
