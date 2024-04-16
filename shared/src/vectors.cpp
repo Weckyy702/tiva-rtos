@@ -1,18 +1,19 @@
+#include "Register.h"
 #include "ints.h"
 #include <stddef.h>
 
 typedef void (*VectorFunction)(void);
 
 extern "C" {
+[[noreturn]] void reset_handler(void);
+void nmi_handler(void);
+void hard_fault_handler(void);
+void mem_manage_handler(void);
+void bus_fault_handler(void);
+void usage_fault_handler(void);
 void sv_call_handler(void);
 void pend_sv_handler(void);
 void sys_tick_handler(void);
-
-void nmi_handler(void);
-void hard_fault_handler(void);
-void bus_fault_handler(void);
-void usage_fault_handler(void);
-void mem_manage_handler(void);
 }
 
 struct [[gnu::packed]] VectorTable {
@@ -28,10 +29,10 @@ struct [[gnu::packed]] VectorTable {
   u32 __padding2[2] = {0};
   VectorFunction pend_sv;
   VectorFunction systick;
-  VectorFunction irqs[138] = {0};
+  VectorFunction irqs[139] = {0};
 };
 
-static_assert(sizeof(VectorTable) == 0x0268);
+static_assert(sizeof(VectorTable) == 0x026C);
 
 static_assert(offsetof(VectorTable, initial_sp) == 0);
 static_assert(offsetof(VectorTable, sv_call) == 0x002C);
@@ -99,7 +100,7 @@ void null_handler(void) {}
         blocking_handler, blocking_handler, blocking_handler, blocking_handler,
         blocking_handler, blocking_handler, blocking_handler, blocking_handler,
         blocking_handler, blocking_handler, blocking_handler, blocking_handler,
-        blocking_handler, blocking_handler,
+        blocking_handler, blocking_handler, blocking_handler,
     }};
 
 #pragma weak sv_call_handler = null_handler
